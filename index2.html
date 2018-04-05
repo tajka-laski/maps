@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Fly to a location based on scroll position</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+    </style>
+</head>
+
+<body>
+
+
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Cousine|Roboto+Condensed');
+
+        body {
+            background-color: #140000;
+
+        }
+
+        #map {
+            position: fixed;
+            width: 50%;
+            margin: 0px 5%;
+        }
+
+        #features {
+            width: 50%;
+            margin-left: 50%;
+            font-family: 'cousine';
+            overflow-y: scroll;
+            background: #140000;
+            color: #f2f2f2;
+        }
+
+        h3 {
+            font-family: 'Roboto Condensed', sans-serif;
+            text-transform: uppercase;
+            font-size: 24px;
+        }
+
+
+
+
+        section {
+            margin: 5% 15%;
+            line-height: 25px;
+            border-bottom: 1px solid #ddd;
+            opacity: 0.25;
+            font-size: 13px;
+        }
+
+        section.active {
+            opacity: 1;
+        }
+
+        section:last-child {
+            border-bottom: none;
+            margin-bottom: 200px;
+        }
+
+        section img {
+            width: 100%;
+            display: block;
+            margin: 0 auto;
+            padding-bottom: 10px;
+        }
+
+    </style>
+
+    <div id='map'></div>
+    <div id='features'>
+        <section id='intro' class='active'>
+            <img src="neon4.png" alt="Moulin Rouge">
+            <h3>Moulin Rouge!</h3>
+            <p>In the year 1900, a British writer named Christian, suffering from depression, begins writing on his typewriter. As Christian narrates, the film flashes back to one year earlier upon Christian's move to the Montmartre district of Paris to become a writer among members of the area's Bohemian movement.</p>
+        </section>
+        <section id='london'>
+            <h3>London</h3>
+            <p>Christian: I first came to Paris one year ago. It was 1899, the Summer of Love. I knew nothing of the Moulin Rouge, its favourite courtisan Satine or the director Ziedler.</p>
+            <img src="tumblr_mpm7ihFUfo1s4e8oro1_500.gif" alt="Christian">
+        </section>
+        <section id='paris'>
+            <h3>Paris</h3>
+            <p>The world had been swept up in a Bohemian revolution. And I had travelled from London to Paris to be a part of it.</p>
+            <img src="paris.jpg" alt="Paris-1899">
+        </section>
+        <section id='montmartre'>
+            <h3>The village of Montmartre</h3>
+            <p>On the hill near Paris was the village of Montmartre. It was not as my father said - a village of sin - but the center of Bohemian world. The musicians, painters, writers. They were known as a Children of the Revolution. and The Moulin Rouge. </p>
+            <img src="montmartre.jpg" alt="Montmartre">
+        </section>
+        <section id='moulinrouge'>
+            <h3>The Moulin Rouge</h3>
+            <p>A nightclub, a dancehall and the bordello ruled over by Harold Ziedler. A kingdom of nighttime pleasures, where the rich and powerful came to play with the young and beautiful creatures of the underworld. The most beautiful of all these was the woman who I loved.</p>
+            <img src="moulinrouge.jpg" alt="Mouling Rouge">
+        </section>
+    </div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoidGFqc29uIiwiYSI6ImNqZmwwMjZjaTBhcnczNG8wMHkwdmJqcXkifQ.PQhWSXw9U9KarOxxDx90og';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v9',
+            center: [-0.118092, 51.509865],
+            zoom: 15.5,
+            bearing: 27,
+            pitch: 45
+        });
+
+        var chapters = {
+            'intro': {
+                bearing: 27,
+                center: [-0.118092, 51.509865],
+                zoom: 15.5,
+                pitch: 20
+            },
+            'london': {
+                duration: 6000,
+                center: [-0.1333, 51.5333],
+                bearing: 150,
+                zoom: 15,
+                pitch: 0
+            },
+            'paris': {
+                bearing: 90,
+                center: [2.3553, 48.8809],
+                zoom: 13,
+                speed: 0.6,
+                pitch: 40
+            },
+            'montmartre': {
+                bearing: 90,
+                center: [2.340607, 48.887691],
+                zoom: 12.3
+            },
+            'moulinrouge': {
+                bearing: 45,
+                center: [2.332400, 48.884129],
+                zoom: 15.3,
+                pitch: 20,
+                speed: 0.5
+            }
+
+        };
+
+        // On every scroll event, check which element is on screen
+        window.onscroll = function() {
+            var chapterNames = Object.keys(chapters);
+            for (var i = 0; i < chapterNames.length; i++) {
+                var chapterName = chapterNames[i];
+                if (isElementOnScreen(chapterName)) {
+                    setActiveChapter(chapterName);
+                    break;
+                }
+            }
+        };
+
+        var activeChapterName = 'baker';
+
+        function setActiveChapter(chapterName) {
+            if (chapterName === activeChapterName) return;
+
+            map.flyTo(chapters[chapterName]);
+
+            document.getElementById(chapterName).setAttribute('class', 'active');
+            document.getElementById(activeChapterName).setAttribute('class', '');
+
+            activeChapterName = chapterName;
+        }
+
+        function isElementOnScreen(id) {
+            var element = document.getElementById(id);
+            var bounds = element.getBoundingClientRect();
+            return bounds.top < window.innerHeight && bounds.bottom > 0;
+        }
+
+    </script>
+
+</body>
+
+</html>
